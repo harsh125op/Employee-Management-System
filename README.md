@@ -84,7 +84,7 @@ Employee-Management-System/
 ## Customization
 
 - **Database:** By default uses H2; configure `application.properties` for MySQL or other databases as needed.
-- **CORS:** Configured for `http://127.0.0.1:5500` in the backend controller, adjust as necessary.
+- **CORS:** Configured for `http://***.0.0.1:****` in the backend controller, adjust as necessary.
 
 ## Code Highlights
 
