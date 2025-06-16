@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Management System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            animation: fadeInDown 1s ease-out;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            animation: fadeInUp 1s ease-out 0.2s both;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .form-section, .list-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            animation: slideInLeft 0.8s ease-out;
+        }
+
+        .list-section {
+            animation: slideInRight 0.8s ease-out;
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            color: #4a5568;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #4a5568;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: rgba(255,255,255,0.8);
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-right: 10px;
+            margin-bottom: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #718096 0%, #2d3748 100%);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+        }
+
+        .employee-grid {
+            display: grid;
+            gap: 15px;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .employee-card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(247,250,252,0.9) 100%);
+            border-radius: 15px;
+            padding: 20px;
+            border-left: 5px solid #667eea;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .employee-card:hover {
+            transform: translateX(5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+
+        .employee-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+        }
+
+        .employee-info h3 {
+            color: #2d3748;
+            margin-bottom: 8px;
+            font-size: 1.3rem;
+        }
+
+        .employee-info p {
+            color: #4a5568;
+            margin-bottom: 4px;
+        }
+
+        .employee-actions {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .employee-actions .btn {
+            padding: 8px 16px;
+            font-size: 14px;
+            margin: 0;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #4a5568;
+            font-size: 1.1rem;
+        }
+
+        .loading::after {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+        }
+
+        .error {
+            background: linear-gradient(135deg, #fed7d7 0%, #feb2b2 100%);
+            color: #c53030;
+            padding: 15px 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border-left: 5px solid #e53e3e;
+        }
+
+        .success {
+            background: linear-gradient(135deg, #c6f6d5 0%, #9ae6b4 100%);
+            color: #22543d;
+            padding: 15px 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border-left: 5px solid #38a169;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(5px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+            transform: scale(0.8);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .modal.show {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideInLeft {
+            from { opacity: 0; transform: translateX(-30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .form-section, .list-section {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Employee Management System</h1>
+            <p>Manage your workforce with style and efficiency</p>
+        </div>
+
+        <div id="message-container"></div>
+
+        <div class="dashboard">
+            <div class="form-section">
+                <h2 class="section-title" id="form-title">Add New Employee</h2>
+                <form id="employee-form">
+                    <div class="form-group">
+                        <label for="firstName">First Name</label>
+                        <input type="text" id="firstName" name="firstName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="lastName">Last Name</label>
+                        <input type="text" id="lastName" name="lastName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+
+                    <button type="submit" class="btn" id="submit-btn">Add Employee</button>
+                    <button type="button" class="btn btn-secondary" id="cancel-btn" style="display: none;">Cancel</button>
+                </form>
+            </div>
+
+            <div class="list-section">
+                <h2 class="section-title">Employee List</h2>
+                <button class="btn btn-success" onclick="loadEmployees()">Refresh List</button>
+                <div id="employee-list" class="employee-grid">
+                    <div class="loading">Loading employees...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal-overlay" id="delete-modal">
+        <div class="modal">
+            <h3>Confirm Delete</h3>
+            <p>Are you sure you want to delete this employee? This action cannot be undone.</p>
+            <div style="margin-top: 20px;">
+                <button class="btn btn-danger" id="confirm-delete">Delete</button>
+                <button class="btn btn-secondary" onclick="closeDeleteModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:8080/api/employees';
+        let currentEmployeeId = null;
+        let isEditing = false;
+        let employeeToDelete = null;
+
+        // DOM Elements
+        const form = document.getElementById('employee-form');
+        const employeeList = document.getElementById('employee-list');
+        const messageContainer = document.getElementById('message-container');
+        const formTitle = document.getElementById('form-title');
+        const submitBtn = document.getElementById('submit-btn');
+        const cancelBtn = document.getElementById('cancel-btn');
+        const deleteModal = document.getElementById('delete-modal');
+        const confirmDeleteBtn = document.getElementById('confirm-delete');
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            loadEmployees();
+            setupEventListeners();
+        });
+
+        function setupEventListeners() {
+            form.addEventListener('submit', handleFormSubmit);
+            cancelBtn.addEventListener('click', resetForm);
+            confirmDeleteBtn.addEventListener('click', confirmDelete);
+        }
+
+        // Show messages to user
+        function showMessage(message, type = 'success') {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = type;
+            messageDiv.textContent = message;
+            messageContainer.innerHTML = '';
+            messageContainer.appendChild(messageDiv);
+            
+            setTimeout(() => {
+                messageDiv.remove();
+            }, 5000);
+        }
+
+        // Handle form submission
+        async function handleFormSubmit(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(form);
+            const employeeData = {
+                firstName: formData.get('firstName'),
+                lastName: formData.get('lastName'),
+                email: formData.get('email')
+            };
+
+            try {
+                let response;
+                if (isEditing) {
+                    response = await fetch(`${API_BASE_URL}/${currentEmployeeId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(employeeData)
+                    });
+                } else {
+                    response = await fetch(API_BASE_URL, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(employeeData)
+                    });
+                }
+
+                if (response.ok) {
+                    const employee = await response.json();
+                    showMessage(isEditing ? 'Employee updated successfully!' : 'Employee added successfully!');
+                    resetForm();
+                    loadEmployees();
+                } else {
+                    throw new Error('Failed to save employee');
+                }
+            } catch (error) {
+                showMessage('Error: ' + error.message, 'error');
+            }
+        }
+
+        // Load all employees
+        async function loadEmployees() {
+            try {
+                employeeList.innerHTML = '<div class="loading">Loading employees...</div>';
+                
+                const response = await fetch(API_BASE_URL);
+                if (!response.ok) {
+                    throw new Error('Failed to load employees');
+                }
+                
+                const employees = await response.json();
+                renderEmployees(employees);
+            } catch (error) {
+                employeeList.innerHTML = `<div class="error">Error loading employees: ${error.message}</div>`;
+            }
+        }
+
+        // Render employees in the UI
+        function renderEmployees(employees) {
+            if (employees.length === 0) {
+                employeeList.innerHTML = '<div class="loading">No employees found. Add your first employee!</div>';
+                return;
+            }
+
+            employeeList.innerHTML = employees.map(employee => `
+                <div class="employee-card" style="animation-delay: ${Math.random() * 0.5}s">
+                    <div class="employee-info">
+                        <h3>${employee.firstName} ${employee.lastName}</h3>
+                        <p><strong>Email:</strong> ${employee.email}</p>
+                        <p><strong>ID:</strong> ${employee.id}</p>
+                    </div>
+                    <div class="employee-actions">
+                        <button class="btn" onclick="editEmployee(${employee.id})">Edit</button>
+                        <button class="btn btn-danger" onclick="showDeleteModal(${employee.id})">Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Edit employee
+        async function editEmployee(id) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/${id}`);
+                if (!response.ok) {
+                    throw new Error('Failed to load employee');
+                }
+                
+                const employee = await response.json();
+                
+                // Populate form
+                document.getElementById('firstName').value = employee.firstName;
+                document.getElementById('lastName').value = employee.lastName;
+                document.getElementById('email').value = employee.email;
+                
+                // Update form state
+                isEditing = true;
+                currentEmployeeId = id;
+                formTitle.textContent = 'Edit Employee';
+                submitBtn.textContent = 'Update Employee';
+                cancelBtn.style.display = 'inline-block';
+                
+                // Scroll to form
+                document.querySelector('.form-section').scrollIntoView({ behavior: 'smooth' });
+            } catch (error) {
+                showMessage('Error loading employee: ' + error.message, 'error');
+            }
+        }
+
+        // Show delete confirmation modal
+        function showDeleteModal(id) {
+            employeeToDelete = id;
+            deleteModal.style.display = 'flex';
+            setTimeout(() => {
+                deleteModal.querySelector('.modal').classList.add('show');
+            }, 10);
+        }
+
+        // Close delete modal
+        function closeDeleteModal() {
+            deleteModal.querySelector('.modal').classList.remove('show');
+            setTimeout(() => {
+                deleteModal.style.display = 'none';
+                employeeToDelete = null;
+            }, 300);
+        }
+
+        // Confirm delete
+        async function confirmDelete() {
+            if (!employeeToDelete) return;
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/${employeeToDelete}`, {
+                    method: 'DELETE'
+                });
+                
+                if (response.ok) {
+                    showMessage('Employee deleted successfully!');
+                    loadEmployees();
+                } else {
+                    throw new Error('Failed to delete employee');
+                }
+            } catch (error) {
+                showMessage('Error deleting employee: ' + error.message, 'error');
+            } finally {
+                closeDeleteModal();
+            }
+        }
+
+        // Reset form to initial state
+        function resetForm() {
+            form.reset();
+            isEditing = false;
+            currentEmployeeId = null;
+            formTitle.textContent = 'Add New Employee';
+            submitBtn.textContent = 'Add Employee';
+            cancelBtn.style.display = 'none';
+        }
+    </script>
+</body>
+</html>
